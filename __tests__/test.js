@@ -17,4 +17,10 @@ describe('Diff', () => {
     const diff = genDiff(pathToFile1, pathToFile2);
     expect(diff).toBe(result);
   });
+  it('#ini', () => {
+    const pathToFile1 = '__tests__/__fixtures__/before1.ini';
+    const pathToFile2 = '__tests__/__fixtures__/after1.ini';
+    const diff = genDiff(pathToFile1, pathToFile2);
+    expect(diff).toBe(result);
+  });
 });
