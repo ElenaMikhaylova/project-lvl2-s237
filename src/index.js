@@ -1,26 +1,19 @@
 import _ from 'lodash';
-import program from 'commander';
-import { safeLoad as parseYaml } from 'js-yaml';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import getParser from './parsers';
+
+const getDataFromFile = (filepath) => {
+  if (!fs.existsSync(filepath)) {
+    throw new Error(`file is not exist: ${filepath}`);
+  }
+  return fs.readFileSync(filepath, 'utf-8');
+};
 
 const genDiff = (filepath1, filepath2) => {
-  if (!(fs.existsSync(filepath1) && fs.existsSync(filepath2))) {
-    return undefined;
-  }
-
-  const fileParsers = [
-    {
-      name: '.json',
-      parse: arg => JSON.parse(fs.readFileSync(arg)),
-    },
-    {
-      name: '.yaml',
-      parse: arg => parseYaml(fs.readFileSync(arg, 'utf8')),
-    },
-  ];
-  const fileBefore = _.find(fileParsers, ['name', path.extname(filepath1)]).parse(filepath1);
-  const fileAfter = _.find(fileParsers, ['name', path.extname(filepath2)]).parse(filepath2);
+  const parse = getParser(path.extname(filepath1));
+  const fileBefore = parse(getDataFromFile(filepath1));
+  const fileAfter = parse(getDataFromFile(filepath2));
 
   const keys = _.union(_.keys(fileBefore), _.keys(fileAfter));
   const result = keys.reduce((acc, key) => {
@@ -35,20 +28,6 @@ const genDiff = (filepath1, filepath2) => {
     return acc.concat(`    ${key}: ${fileAfter[key]}`);
   }, []);
   return `{\n${result.join('\n')}\n}\n`;
-};
-
-export const setProgramOptions = () => {
-  program
-    .description('Compares two configuration files and shows a difference.')
-    .version('0.1.0')
-    .arguments('<firstConfig> <secondConfig>')
-    .option('-f, --format [type]', 'Output format')
-    .action((firstConfig, secondConfig) => {
-      const result = genDiff(firstConfig, secondConfig);
-      console.log(result);
-    });
-
-  program.parse(process.argv);
 };
 
 export default genDiff;
