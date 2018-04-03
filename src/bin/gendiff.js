@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 
-import setProgramOptions from '..';
+import { setProgramOptions } from '..';
 
 setProgramOptions();
