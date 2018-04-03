@@ -1,6 +1,3 @@
-
-/* eslint no-undef: "off" */
-
 import fs from 'fs';
 import genDiff from '../src/';
 
