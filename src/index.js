@@ -1,25 +1,38 @@
 import _ from 'lodash';
 import program from 'commander';
-
-const fs = require('fs');
+import { safeLoad as parseYaml } from 'js-yaml';
+import path from 'path';
+import fs from 'fs';
 
 const genDiff = (filepath1, filepath2) => {
   if (!(fs.existsSync(filepath1) && fs.existsSync(filepath2))) {
     return undefined;
   }
-  const jsonBefore = JSON.parse(fs.readFileSync(filepath1));
-  const jsonAfter = JSON.parse(fs.readFileSync(filepath2));
-  const keys = _.union(_.keys(jsonBefore), _.keys(jsonAfter));
+
+  const fileParsers = [
+    {
+      name: '.json',
+      parse: arg => JSON.parse(fs.readFileSync(arg)),
+    },
+    {
+      name: '.yaml',
+      parse: arg => parseYaml(fs.readFileSync(arg, 'utf8')),
+    },
+  ];
+  const fileBefore = _.find(fileParsers, ['name', path.extname(filepath1)]).parse(filepath1);
+  const fileAfter = _.find(fileParsers, ['name', path.extname(filepath2)]).parse(filepath2);
+
+  const keys = _.union(_.keys(fileBefore), _.keys(fileAfter));
   const result = keys.reduce((acc, key) => {
-    if (!_.has(jsonAfter, key)) {
-      return acc.concat(`  - ${key}: ${jsonBefore[key]}`);
+    if (!_.has(fileAfter, key)) {
+      return acc.concat(`  - ${key}: ${fileBefore[key]}`);
     }
-    if (!_.has(jsonBefore, key)) {
-      return acc.concat(`  + ${key}: ${jsonAfter[key]}`);
-    } else if (jsonBefore[key] !== jsonAfter[key]) {
-      return acc.concat(`  + ${key}: ${jsonAfter[key]}`, `  - ${key}: ${jsonBefore[key]}`);
+    if (!_.has(fileBefore, key)) {
+      return acc.concat(`  + ${key}: ${fileAfter[key]}`);
+    } else if (fileBefore[key] !== fileAfter[key]) {
+      return acc.concat(`  + ${key}: ${fileAfter[key]}`, `  - ${key}: ${fileBefore[key]}`);
     }
-    return acc.concat(`    ${key}: ${jsonAfter[key]}`);
+    return acc.concat(`    ${key}: ${fileAfter[key]}`);
   }, []);
   return `{\n${result.join('\n')}\n}\n`;
 };
