@@ -11,4 +11,4 @@ lint:
 	npm run eslint .
 
 test:
-	npm test
+	npm test -- --watch
