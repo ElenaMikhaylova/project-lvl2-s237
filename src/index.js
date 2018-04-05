@@ -3,6 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import getParser from './parsers';
 
+const diffAdded = 'added';
+const diffRemoved = 'removed';
+const diffUpdated = 'updated';
+
 const getDataFromFile = (filepath) => {
   if (!fs.existsSync(filepath)) {
     throw new Error(`file is not exist: ${filepath}`);
@@ -16,24 +20,30 @@ const parseDiff = (data1, data2) => {
     const root = {
       key,
       value: '',
-      diff: ' ',
+      oldValue: '',
+      type: ' ',
       children: [],
     };
-    const value1 = data1[key];
-    const value2 = data2[key];
+    const oldValue = data1[key];
+    const value = data2[key];
     if (!_.has(data2, key)) {
-      return [...acc, ({ ...root, value: value1, diff: '-' })];
+      return [...acc, ({ ...root, oldValue, type: diffRemoved })];
     }
     if (!_.has(data1, key)) {
-      return [...acc, ({ ...root, value: value2, diff: '+' })];
+      return [...acc, ({ ...root, value, type: diffAdded })];
     }
-    if (value1 instanceof Object && value2 instanceof Object) {
-      return [...acc, ({ ...root, children: parseDiff(value1, value2) })];
+    if (oldValue instanceof Object && value instanceof Object) {
+      return [...acc, ({ ...root, children: parseDiff(oldValue, value) })];
     }
-    if (value1 !== value2) {
-      return [...acc, ({ ...root, value: value2, diff: '+' }), ({ ...root, value: value1, diff: '-' })];
+    if (oldValue !== value) {
+      return [...acc, ({
+        ...root,
+        value,
+        oldValue,
+        type: diffUpdated,
+      })];
     }
-    return [...acc, ({ ...root, value: value1 })];
+    return [...acc, ({ ...root, value })];
   }, []);
 };
 
@@ -45,15 +55,28 @@ const stringify = (data, tab) => {
 };
 
 const renderDiff = (ast, tab = 1) => {
+  const buildDiffLine = (key, value, sign = ' ') =>
+    `${'  '.repeat(tab)}${sign} ${key}: ${stringify(value, tab)}\n`;
+
   const result = ast.reduce((acc, node) => {
     const {
       key,
       value,
-      diff,
+      oldValue,
+      type,
       children,
     } = node;
     if (children.length === 0) {
-      return acc.concat(`${'  '.repeat(tab)}${diff} ${key}: ${stringify(value, tab)}\n`);
+      if (type === diffUpdated) {
+        return acc.concat(buildDiffLine(key, value, '+'), buildDiffLine(key, oldValue, '-'));
+      }
+      if (type === diffAdded) {
+        return acc.concat(buildDiffLine(key, value, '+'));
+      }
+      if (type === diffRemoved) {
+        return acc.concat(buildDiffLine(key, oldValue, '-'));
+      }
+      return acc.concat(buildDiffLine(key, value));
     }
     return acc.concat(`${'  '.repeat(tab)}  ${key}: ${renderDiff(children, tab + 2)}\n`);
   }, '');
