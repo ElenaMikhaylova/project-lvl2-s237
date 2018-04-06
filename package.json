@@ -1,6 +1,6 @@
 {
   "name": "gendiffem",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "project2",
   "main": "dist/index.js",
   "bin": {
