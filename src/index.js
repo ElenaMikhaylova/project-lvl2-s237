@@ -6,6 +6,8 @@ import getParser from './parsers';
 const diffAdded = 'added';
 const diffRemoved = 'removed';
 const diffUpdated = 'updated';
+const diffUnchanged = 'unchanged';
+const diffNested = 'nested';
 
 const getDataFromFile = (filepath) => {
   if (!fs.existsSync(filepath)) {
@@ -14,73 +16,66 @@ const getDataFromFile = (filepath) => {
   return fs.readFileSync(filepath, 'utf-8');
 };
 
+const keyParseActions = [
+  {
+    type: diffAdded,
+    check: (data1, data2, key) => !_.has(data1, key),
+    action: value => ({ value, type: diffAdded }),
+  },
+  {
+    type: diffRemoved,
+    check: (data1, data2, key) => !_.has(data2, key),
+    action: (value, oldValue) => ({ oldValue, type: diffRemoved }),
+  },
+  {
+    type: diffNested,
+    check: (data1, data2, key) => _.isObject(data1[key]) && _.isObject(data2[key]),
+    action: (value, oldValue, fn) => ({ children: fn(oldValue, value), type: diffNested }),
+  },
+  {
+    type: diffUpdated,
+    check: (data1, data2, key) => data1[key] !== data2[key],
+    action: (value, oldValue) => ({ value, oldValue, type: diffUpdated }),
+  },
+  {
+    type: diffUnchanged,
+    check: (data1, data2, key) => data1[key] === data2[key],
+    action: value => ({ value, type: diffUnchanged }),
+  },
+];
+
 const parseDiff = (data1, data2) => {
   const keys = _.union(_.keys(data1), _.keys(data2));
-  return keys.reduce((acc, key) => {
-    const root = {
-      key,
-      value: '',
-      oldValue: '',
-      type: ' ',
-      children: [],
-    };
-    const oldValue = data1[key];
-    const value = data2[key];
-    if (!_.has(data2, key)) {
-      return [...acc, ({ ...root, oldValue, type: diffRemoved })];
-    }
-    if (!_.has(data1, key)) {
-      return [...acc, ({ ...root, value, type: diffAdded })];
-    }
-    if (oldValue instanceof Object && value instanceof Object) {
-      return [...acc, ({ ...root, children: parseDiff(oldValue, value) })];
-    }
-    if (oldValue !== value) {
-      return [...acc, ({
-        ...root,
-        value,
-        oldValue,
-        type: diffUpdated,
-      })];
-    }
-    return [...acc, ({ ...root, value })];
-  }, []);
+  return keys.map((key) => {
+    const { action } = _.find(keyParseActions, ({ check }) => check(data1, data2, key));
+    return ({ key, ...action(data2[key], data1[key], parseDiff) });
+  });
 };
 
 const stringify = (data, tab) => {
-  if (data instanceof Object) {
+  if (_.isObject(data)) {
     return _.keys(data).map(key => `{\n${'  '.repeat(tab + 2)}  ${key}: ${data[key]}\n${'  '.repeat(tab + 1)}}`);
   }
   return data;
 };
 
-const renderDiff = (ast, tab = 1) => {
-  const buildDiffLine = (key, value, sign = ' ') =>
-    `${'  '.repeat(tab)}${sign} ${key}: ${stringify(value, tab)}\n`;
+const buildDiffLine = (key, value, tab, sign = ' ') =>
+  `${'  '.repeat(tab)}${sign} ${key}: ${stringify(value, tab)}\n`;
 
+const nodeRenderActions = {
+  [diffAdded]: (node, tab) => buildDiffLine(node.key, node.value, tab, '+'),
+  [diffRemoved]: (node, tab) => buildDiffLine(node.key, node.oldValue, tab, '-'),
+  [diffNested]: (node, tab, fn) => `${'  '.repeat(tab)}  ${node.key}: ${fn(node.children, tab + 2)}\n`,
+  [diffUpdated]: (node, tab) => `${buildDiffLine(node.key, node.value, tab, '+')}${buildDiffLine(node.key, node.oldValue, tab, '-')}`,
+  [diffUnchanged]: (node, tab) => buildDiffLine(node.key, node.value, tab),
+};
+
+const renderDiff = (ast, tab = 1) => {
   const result = ast.reduce((acc, node) => {
-    const {
-      key,
-      value,
-      oldValue,
-      type,
-      children,
-    } = node;
-    if (children.length === 0) {
-      if (type === diffUpdated) {
-        return acc.concat(buildDiffLine(key, value, '+'), buildDiffLine(key, oldValue, '-'));
-      }
-      if (type === diffAdded) {
-        return acc.concat(buildDiffLine(key, value, '+'));
-      }
-      if (type === diffRemoved) {
-        return acc.concat(buildDiffLine(key, oldValue, '-'));
-      }
-      return acc.concat(buildDiffLine(key, value));
-    }
-    return acc.concat(`${'  '.repeat(tab)}  ${key}: ${renderDiff(children, tab + 2)}\n`);
-  }, '');
-  return `{\n${result}${'  '.repeat(tab - 1)}}`;
+    const nodeRender = nodeRenderActions[node.type];
+    return [...acc, nodeRender(node, tab, renderDiff)];
+  }, []);
+  return `{\n${result.join('')}${'  '.repeat(tab - 1)}}`;
 };
 
 const genDiff = (filepath1, filepath2) => {
