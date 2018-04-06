@@ -16,7 +16,7 @@ const nodeRenderPlainActions = {
 
 const renderDiffPlain = (ast, parent = []) => {
   const result = ast.filter(node => node.type !== 'unchanged').reduce((acc, node) => {
-    const fullKey = _.flatten([...parent, [node.key]]).join('.');
+    const fullKey = _.flatten([...parent, node.key]).join('.');
     const nodeRender = nodeRenderPlainActions[node.type];
     return [...acc, nodeRender(node, fullKey, parent, renderDiffPlain)];
   }, []);

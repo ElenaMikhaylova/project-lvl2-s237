@@ -6,8 +6,10 @@ describe('Json', () => {
   const pathToFile2 = '__tests__/__fixtures__/after1.json';
   const pathToResult1 = '__tests__/__fixtures__/diff1';
   const pathToResult2 = '__tests__/__fixtures__/diff1_plain';
+  const pathToResult3 = '__tests__/__fixtures__/diff1_json';
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
+  const result3 = fs.readFileSync(pathToResult3, 'utf-8');
   it('#main format', () => {
     const diff = `${genDiff(pathToFile1, pathToFile2)}\n`;
     expect(diff).toBe(result1);
@@ -15,6 +17,10 @@ describe('Json', () => {
   it('#plain format', () => {
     const diff = genDiff(pathToFile1, pathToFile2, 'plain');
     expect(diff).toBe(result2);
+  });
+  it('#json format', () => {
+    const diff = `${genDiff(pathToFile1, pathToFile2, 'json')}\n`;
+    expect(diff).toBe(result3);
   });
 });
 
