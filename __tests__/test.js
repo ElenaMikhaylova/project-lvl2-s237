@@ -1,12 +1,14 @@
 import fs from 'fs';
-import genDiff from '../src/';
+import genDiff from '../src';
+
+const pathToTestDir = '__tests__/__fixtures__/';
 
 describe('Json', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before1.json';
-  const pathToFile2 = '__tests__/__fixtures__/after1.json';
-  const pathToResult1 = '__tests__/__fixtures__/diff1';
-  const pathToResult2 = '__tests__/__fixtures__/diff1_plain';
-  const pathToResult3 = '__tests__/__fixtures__/diff1_json';
+  const pathToFile1 = `${pathToTestDir}before1.json`;
+  const pathToFile2 = `${pathToTestDir}after1.json`;
+  const pathToResult1 = `${pathToTestDir}diff1`;
+  const pathToResult2 = `${pathToTestDir}diff1_plain`;
+  const pathToResult3 = `${pathToTestDir}diff1_json`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   const result3 = fs.readFileSync(pathToResult3, 'utf-8');
@@ -25,10 +27,10 @@ describe('Json', () => {
 });
 
 describe('Json tree', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before2.json';
-  const pathToFile2 = '__tests__/__fixtures__/after2.json';
-  const pathToResult1 = '__tests__/__fixtures__/diff2';
-  const pathToResult2 = '__tests__/__fixtures__/diff2_plain';
+  const pathToFile1 = `${pathToTestDir}before2.json`;
+  const pathToFile2 = `${pathToTestDir}after2.json`;
+  const pathToResult1 = `${pathToTestDir}diff2`;
+  const pathToResult2 = `${pathToTestDir}diff2_plain`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   it('#main format', () => {
@@ -42,10 +44,10 @@ describe('Json tree', () => {
 });
 
 describe('Yaml', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before1.yaml';
-  const pathToFile2 = '__tests__/__fixtures__/after1.yaml';
-  const pathToResult1 = '__tests__/__fixtures__/diff1';
-  const pathToResult2 = '__tests__/__fixtures__/diff1_plain';
+  const pathToFile1 = `${pathToTestDir}before1.yaml`;
+  const pathToFile2 = `${pathToTestDir}after1.yaml`;
+  const pathToResult1 = `${pathToTestDir}diff1`;
+  const pathToResult2 = `${pathToTestDir}diff1_plain`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   it('#main format', () => {
@@ -59,10 +61,10 @@ describe('Yaml', () => {
 });
 
 describe('Yaml tree', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before2.yaml';
-  const pathToFile2 = '__tests__/__fixtures__/after2.yaml';
-  const pathToResult1 = '__tests__/__fixtures__/diff2';
-  const pathToResult2 = '__tests__/__fixtures__/diff2_plain';
+  const pathToFile1 = `${pathToTestDir}before2.yaml`;
+  const pathToFile2 = `${pathToTestDir}after2.yaml`;
+  const pathToResult1 = `${pathToTestDir}diff2`;
+  const pathToResult2 = `${pathToTestDir}diff2_plain`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   it('#main format', () => {
@@ -76,10 +78,10 @@ describe('Yaml tree', () => {
 });
 
 describe('Ini', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before1.ini';
-  const pathToFile2 = '__tests__/__fixtures__/after1.ini';
-  const pathToResult1 = '__tests__/__fixtures__/diff1';
-  const pathToResult2 = '__tests__/__fixtures__/diff1_plain';
+  const pathToFile1 = `${pathToTestDir}before1.ini`;
+  const pathToFile2 = `${pathToTestDir}after1.ini`;
+  const pathToResult1 = `${pathToTestDir}diff1`;
+  const pathToResult2 = `${pathToTestDir}diff1_plain`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   it('#main format', () => {
@@ -93,10 +95,10 @@ describe('Ini', () => {
 });
 
 describe('Ini tree', () => {
-  const pathToFile1 = '__tests__/__fixtures__/before2.ini';
-  const pathToFile2 = '__tests__/__fixtures__/after2.ini';
-  const pathToResult1 = '__tests__/__fixtures__/diff2';
-  const pathToResult2 = '__tests__/__fixtures__/diff2_plain';
+  const pathToFile1 = `${pathToTestDir}before2.ini`;
+  const pathToFile2 = `${pathToTestDir}after2.ini`;
+  const pathToResult1 = `${pathToTestDir}diff2`;
+  const pathToResult2 = `${pathToTestDir}diff2_plain`;
   const result1 = fs.readFileSync(pathToResult1, 'utf-8');
   const result2 = fs.readFileSync(pathToResult2, 'utf-8');
   it('#main format', () => {
