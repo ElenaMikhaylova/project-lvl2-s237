@@ -4,13 +4,6 @@ import path from 'path';
 import getParser from './parsers';
 import getRenderer from './renderers';
 
-const getDataFromFile = (filepath) => {
-//  if (!fs.existsSync(filepath)) {
-//    throw new Error(`file is not exist: ${filepath}`);
-//  }
-  return fs.readFileSync(filepath, 'utf-8');
-};
-
 const keyParseActions = [
   {
     check: (data1, data2, key) => !_.has(data1, key),
