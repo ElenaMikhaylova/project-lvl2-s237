@@ -5,9 +5,9 @@ import getParser from './parsers';
 import getRenderer from './renderers';
 
 const getDataFromFile = (filepath) => {
-  if (!fs.existsSync(filepath)) {
-    throw new Error(`file is not exist: ${filepath}`);
-  }
+//  if (!fs.existsSync(filepath)) {
+//    throw new Error(`file is not exist: ${filepath}`);
+//  }
   return fs.readFileSync(filepath, 'utf-8');
 };
 
@@ -42,11 +42,13 @@ const parseDiff = (data1, data2) => {
   });
 };
 
-const genDiff = (filepath1, filepath2, format = 'main') => {
-  const parse = getParser(path.extname(filepath1));
-  const fileContents1 = parse(getDataFromFile(filepath1));
-  const fileContents2 = parse(getDataFromFile(filepath2));
-  const ast = parseDiff(fileContents1, fileContents2);
+const genDiff = (beforeFilePath, afterFilePath, format = 'main') => {
+  const parse = getParser(path.extname(beforeFilePath));
+  const beforeFileRaw = fs.readFileSync(beforeFilePath, 'utf-8');
+  const afterFileRaw = fs.readFileSync(afterFilePath, 'utf-8');
+  const beforeFileData = parse(beforeFileRaw);
+  const afterFileData = parse(afterFileRaw);
+  const ast = parseDiff(beforeFileData, afterFileData);
   const render = getRenderer(format);
   return render(ast);
 };

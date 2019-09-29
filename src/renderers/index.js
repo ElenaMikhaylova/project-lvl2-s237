@@ -1,6 +1,7 @@
 import renderDiff from './mainRenderer';
 import renderDiffPlain from './plainRenderer';
 import renderDiffJson from './jsonRenderer';
+import getHandlerByType from '../utils';
 
 const renderers = {
   main: renderDiff,
@@ -8,10 +9,4 @@ const renderers = {
   json: renderDiffJson,
 };
 
-export default format => (data) => {
-  const render = renderers[format];
-  if (!render) {
-    throw new Error(`unknown format: ${format}`);
-  }
-  return render(data);
-};
+export default ext => getHandlerByType(ext, renderers);
