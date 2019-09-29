@@ -27,9 +27,9 @@ describe('Json', () => {
 describe('Yaml', () => {
   const pathToFileBeforeYaml = path.join(fixturesPath, 'before.yaml');
   const pathToFileAfterYaml = path.join(fixturesPath, 'after.yaml');
-  test('#main format', () => {
-    const diff = genDiff(pathToFileBeforeYaml, pathToFileAfterYaml);
-    expect(diff).toBe(prettyExpected);
+  test('#plain format', () => {
+    const diff = genDiff(pathToFileBeforeYaml, pathToFileAfterYaml, 'plain');
+    expect(diff).toBe(plainExpected);
   });
   test('#json format', () => {
     const diff = genDiff(pathToFileBeforeYaml, pathToFileAfterYaml, 'json');
